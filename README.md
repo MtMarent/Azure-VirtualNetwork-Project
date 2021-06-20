@@ -109,3 +109,7 @@ Specific commands the user will need to run to download the playbook
 - name: installing elk hosts: [your_machine]
 - Ctrl + x to exit file
 - ansible-playbook install-elk.yml
+
+
+The text file below contains other scripts written by me to showcase other abilities I possess utilizing Linux Systems:
+[MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Linux.txt](https://github.com/MtMarent/Azure-VirtualNetwork-Project/files/6681738/MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Linux.txt)
