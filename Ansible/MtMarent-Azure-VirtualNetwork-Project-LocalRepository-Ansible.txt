@@ -1,0 +1,164 @@
+#######MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Ansible#######
+########################################
+#######Ansible YAML scripts#######
+###apache.yml script###
+---
+  - name: My first playbook
+    hosts: webservers
+    become: true
+    tasks:
+
+    - name: Install apache httpd
+      apt:
+        name: apache2
+        state: absent
+########################################
+###docker.yml script###
+---
+  - name: Config Web VM with Docker
+    hosts: webservers
+    become: true
+    tasks:
+
+    - name: docker.io
+      apt:
+        update_cache: yes
+        name: docker.io
+        state: present
+
+    - name: Install pip3
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Install Python Docker Module
+      pip:
+        name: docker
+        state: present
+
+    - name: download and launch a docker web container
+      docker_container:
+        name: dvwa
+        image: cyberxsecurity/dvwa
+        state: started
+        restart_policy: always
+        published_ports: 80:80
+########################################
+###elk.yml script###
+---
+  - name: Configure ELK VM with Docker
+    hosts: elk
+    remote_user: azadmin
+    become: true
+    tasks:
+
+    - name: Install docker.io
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        name: docker.io
+        state: present
+
+    - name: Install python3-pip
+      apt:
+        force_apt_get: yes
+        name: python3-pip
+        state: present
+
+    - name: Install Docker Module
+      pip:
+        name: docker
+        state: present
+
+    - name: Use more memory
+      sysctl:
+        name: vm.max_map_count
+        sysctl_set: yes
+        value: 262144
+        state: present
+        reload: yes
+
+    - name: Download and launch a docker elk container
+      docker_container:
+        name: elk
+        image: sebp/elk:761
+        state: started
+        restart_policy: always
+        published_ports:
+          - 5601:5601
+          - 9200:9200
+          - 5044:5044
+
+    - name: Enable service docker on boot
+      systemd:
+        name: docker
+        enabled: yes
+########################################
+###metricbeat-playbook.yml script###
+---
+  - name: installing and launching metricbeat
+    hosts: webservers
+    become: yes
+    tasks:
+
+    - name: download metricbeat deb
+      command: curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.6.1-amd64.deb
+
+    - name: install metricbeat deb
+      command: dpkg -i "metricbeat-7.6.1-amd64.deb"
+
+    - name: drop in metricbeat.yml
+      copy:
+        src: /etc/ansible/files/metricbeat-config.yml
+        dest: /etc/metricbeat/metricbeat.yml
+
+    - name: enable and configure system module
+      command: metricbeat modules enable docker
+
+    - name: setup metricbeat
+      command: metricbeat setup
+
+    - name: start metricbeat service
+      command: service metricbeat start
+
+    - name: enable service metricbeat on boot
+      systemd:
+        name: metricbeat
+        enabled: yes
+########################################
+###filebeat-playbook.yml script###
+---
+  - name: installing and launching filebeat
+    hosts: webservers
+    become: yes
+    tasks:
+
+    - name: download filebeat deb
+      command: curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.4.0-amd64.deb
+
+    - name: install filebeat deb
+      command: dpkg -i "filebeat-7.4.0-amd64.deb"
+
+    - name: drop in filebeat.yml
+      copy:
+        src: /etc/ansible/files/filebeat-config.yml
+        dest: /etc/filebeat/filebeat.yml
+
+    - name: enable and configure system module
+      command: filebeat modules enable system
+
+    - name: setup filebeat
+      command: filebeat setup
+
+    - name: start filebeat service
+      command: service filebeat start
+
+    - name: enable service filebeat on boot
+      systemd:
+        name: filebeat
+        enabled: yes
+########################################
+
+
+
+

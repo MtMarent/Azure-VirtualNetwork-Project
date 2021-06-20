@@ -1,0 +1,186 @@
+#######MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Linux#######
+########################################
+###backup.sh###
+#!/bin/bash
+
+mkdir -p /var/backup
+
+tar cvvzf /var/backup/home.tar.gz /home
+
+mv /var/backup/home.tar.gz /var/backup/home.01012020.tar.gz
+
+tar cvvzf /var/backup/system.tar.gz /home
+
+ls -lh /var/backup > /var/backup/file_report.txt
+
+free -h > /var/backup/disk_report.txt
+
+
+
+###update.sh###
+#!/bin/bash
+
+apt update -y
+
+apt upgrade -y
+
+apt full-upgrade -y
+
+apt autoremove --purge -y
+
+
+
+###cleanup.sh###
+#!/bin/bash
+
+rm -rf /tmp/*
+rm -rf /var/tmp/*
+
+apt clean -y
+
+rm -rf /home/sysadmin/.cache/thumbnails
+rm -rf /home/instructor/.cache/thumbnails
+rm -rf /home/student/.cache/thumbnails
+rm -rf /root/.cache/thumbnails
+
+
+
+###lynis.system.sh###
+#!/bin/bash
+
+lynis audit system >> /tmp/lynis.system_scan.log
+
+
+
+###lynis.partial.sh###
+#!/bin/bash
+
+lynis audit --tests-from-group malware,authentication,networking.storage,filesystems >> /tmp/lynis.partial.sh
+
+
+
+###system.sh###
+#!/bin/bash
+
+#Free memory output to a free_mem.txt file
+free -h > ~/backups/freemem/free_mem.txt
+
+#Disk usage output to a disk_usage.txt file
+du -h > ~/backups/diskuse/disk_usage.txt
+
+#List of open files to a open_list.txt file
+lsof > ~/backups/openlist/open_list.txt
+
+#Free disk space to a free_disk.txt file
+df -h > ~/backups/freedisk/free_disk.txt
+
+
+
+###sys_info.sh###
+#!/bin/bash
+
+
+# Check if script was run as root. Exit if false.
+if [ $UID -ne 0 ];
+then
+	echo "Please run this script with sudo."
+	exit
+fi
+
+# Define Variables
+output=$Home/research/sys_info.txt
+ip=$(ip addr | grep inet | tail -2 | head -1)
+suids=$(sudo find / -type f -perm /4000 2> /dev/null)
+cpu=$(lscpu | grep CPU)
+disk=$(df -H | head -2)
+
+# Define Lists to use later
+commands=(
+	'date'
+	'uname -a'
+	'hostname -s'
+)
+
+files=(
+	'/etc/passwd'
+	'/etc/shadow'
+	'/etc/hosts'
+
+# Check for research directory. Create it if needed.
+if [ ! -d $HOME/research ]; then
+	mkdir $HOME/research
+fi
+
+# Check for output file. Clear it if needed.
+if [ -f $output ]; then
+	> $output
+fi
+
+#############################################################################
+##############
+# Start Scipt
+
+echo "A Quick System Audit Script" >> $output
+date >> $output
+echo "" >> $output
+
+# Bonus 1
+echo -e "Display sudo permissions by user\n"
+for user in $(ls /home);
+do
+	sudo -lU $user
+done
+
+#Bonus 2
+echo -e "Run through 'date' 'uname -a' and 'hostname -s' commands \n" >> $output
+for x in {0..2} ;
+do
+	results=$(${commands[$x]})
+	echo "Results of "${commands[$x]}" command:" >> $output
+	echo $results >> $output
+	echo "" >> $output
+done
+
+# Display Machine type
+echo "Machine Type Info:" >> $output
+echo -e "$MACHTYPE \n" >> $output
+
+# Display IP Address info
+echo -e "IP Info:" >> $output
+echo -e "$ip \n" >> $output
+
+# Display Memory usage
+echo -e "\nMemory Info:" >> $output
+lscpu | grep CPU >> $output
+
+# Display Disk usage
+echo -e "\nDisk Usage:" >> $output
+df -H | head -2 >> $output
+
+# Display login info for the current user
+echo -e "\nCurrent user login information: \n $(who -a) \n" >> $output
+
+# Display DNS Info
+echo "DNS Servers:" >> $output
+cat /etc/resolv.conf >> $output
+
+
+# List SUID files
+echo -e "\nSUID Files:" >> $output
+for suid in $suids;
+do
+	echo $suid >> $output
+done
+
+# List top 10 processes
+echo -e "\nTop 10 Processes" >> $output
+ps aux --sort -%mem | awk {'print $1, $2, $3, $4, $11'} | head >> $output
+
+# Check the permissions on files
+echo -e "\nThe permissions for sensitive /etc files: \n" >> $output
+
+for file in ${files[@]};
+do
+	ls -l $file >> $output
+done
+########################################
