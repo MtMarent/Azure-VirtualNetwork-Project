@@ -2,11 +2,11 @@
 
 The files in this repository were used to configure the network depicted below.
 
-https://github.com/MtMarent/Azure-VirtualNetwork-Project/Diagrams/'virtual network map.png'
+![virtual network map](https://user-images.githubusercontent.com/79069246/122662077-1c23f800-d145-11eb-87d0-47907682a865.png)
 
 These files have been tested and used to generate a live ELK deployment on Azure. They can be used to either recreate the entire deployment pictured above. Alternatively, select portions of the MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Ansible file may be used to install only certain pieces of it, such as Filebeat.
 
-https://github.com/MtMarent/Azure-VirtualNetwork-Project/Ansible/MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Ansible.txt
+[MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Ansible.txt](https://github.com/MtMarent/Azure-VirtualNetwork-Project/files/6681734/MtMarent-Azure-VirtualNetwork-Project-LocalRepository-Ansible.txt)
 
 This document contains the following details:
 - Description of the Topology
@@ -74,7 +74,7 @@ The playbook implements the following tasks:
 
 The following screenshot displays the result of running `docker ps` after successfully configuring the ELK instance.
 
-https://github.com/MtMarent/Azure-VirtualNetwork-Project/Images/'elk docker ps.png'
+![elk docker ps](https://user-images.githubusercontent.com/79069246/122662079-27772380-d145-11eb-81fd-2a7244e43822.png)
 
 ### Target Machines & Beats
 This ELK server is configured to monitor the following machines:
